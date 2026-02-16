@@ -47,8 +47,8 @@ Age-X/
 ### Safety Logic (Strict Mode)
 The `SafetyEngine` implements a state machine with the following rules:
 - **Default State**: `Kid` (Locked).
-- **Upgrade Path**: `Kid` -> `Adult` requires **5 consecutive frames** of >85% confidence.
-- **Downgrade Path**: `Adult` -> `Kid` occurs on **1 single frame** of detection (Zero Tolerance).
+- **Upgrade Path**: `Kid` -> `Adult` requires **1 consecutive frame** of >60% confidence (checked every 12 seconds).
+- **Downgrade Path**: `Adult` -> `Kid` occurs on **1 single frame** of Kid/Teen detection (Zero Tolerance).
 - **Fail-Safe**: Network errors, camera failures, or ambiguous results force `Kid` mode.
 
 ---

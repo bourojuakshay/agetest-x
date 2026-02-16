@@ -11,7 +11,7 @@ const CONFIG = {
         ADULT_FRAME_BUFFER: 1, // Unlock faster (20s interval is long enough)
         KID_LOCK_IMMEDIATE: true
     },
-    INTERVAL_MS: 20000 // 20 Seconds
+    INTERVAL_MS: 12000 // 12 Seconds
 };
 
 // ============================================
@@ -414,6 +414,13 @@ class SafetyEngine {
         if (data.error || data.forced_safety) {
             console.warn("Safety Warning:", data.msg || "Unknown Error");
 
+            // CRITICAL: Immediate Action on Forced Safety (e.g. No Face)
+            if (data.forced_safety) {
+                this.forceSafeMode(data.msg || "Forced Safety / Face Lost");
+                return;
+            }
+
+            // Normal Error Buffer (like Network Glitch)
             if (this.currentMode !== "Kid") { // Only degrade if not already Kid
                 this.errorBuffer++;
                 if (this.errorBuffer > this.MAX_ERROR_BUFFER) {
@@ -507,6 +514,12 @@ class App {
         this.router = new Router(this);
         this.safetyEngine = new SafetyEngine(this.handleAgeUpdate.bind(this));
 
+        // Popup Element
+        this.securityPopup = document.getElementById("securityPopup");
+        // Add Close listener if manual close is desired (optional)
+        const closeBtn = document.getElementById("closeSecurityPopup");
+        if (closeBtn) closeBtn.addEventListener("click", () => this.showSecurityPopup(false));
+
         this.init();
     }
 
@@ -533,6 +546,22 @@ class App {
         if (this.ui.scanOverlay) {
             if (show) this.ui.scanOverlay.classList.add("scanning-visible");
             else this.ui.scanOverlay.classList.remove("scanning-visible");
+        }
+    }
+
+    showSecurityPopup(show) {
+        if (!this.securityPopup) return;
+
+        if (show) {
+            const tl = gsap.timeline();
+            this.securityPopup.style.display = "flex";
+            tl.fromTo(this.securityPopup, { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(1.7)" });
+        } else {
+            gsap.to(this.securityPopup, {
+                opacity: 0, scale: 0.9, duration: 0.2, onComplete: () => {
+                    this.securityPopup.style.display = "none";
+                }
+            });
         }
     }
 
@@ -657,9 +686,15 @@ class App {
             // Safe Mode UI
             this.ui.badge.className = "status-badge status-kid";
             // Check specifically for Face Lost to show overlay
-            if (reason && reason.includes("Face Lost")) {
+            if (reason && (reason.includes("Face Lost") || reason.includes("Forced Safety") || reason.includes("No face detected"))) {
                 if (this.ui.overlay) this.ui.overlay.classList.add("no-face-visible");
+                this.showSecurityPopup(true); // SHOW POPUP
                 this.reelManager.pause();
+
+                // FORCE RELOAD TO KID CONTENT EVEN IF POPUP IS SHOWN
+                this.ui.label.innerText = tag.toUpperCase();
+                this.reelManager.loadReels("Kid");
+                this.homeManager.loadGrid("Kid", true);
                 return;
             }
         } else {
@@ -672,6 +707,7 @@ class App {
 
         // Resume if valid
         if (this.ui.overlay) this.ui.overlay.classList.remove("no-face-visible");
+        this.showSecurityPopup(false); // HIDE POPUP on valid detection
 
         // Reload Content with specific TAG
         this.reelManager.loadReels(tag);
