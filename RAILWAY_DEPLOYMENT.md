@@ -16,20 +16,28 @@
 3. **Deploy from GitHub**: 
    - Select "Deploy from GitHub repo"
    - Choose your repository: `bourojuakshay/agetest-x`
-   - Railway will detect the project
-
-4. **Configure Backend Service**:
-   - Click "Add Service" → "GitHub Repo"
-   - Set **Root Directory**: `backend`
-   - Railway will auto-detect `nixpacks.toml` and deploy
    
-5. **Set Environment Variables** (if needed):
-   - Go to service settings → Variables
+4. **IMPORTANT - Configure Root Directory**:
+   - After selecting the repo, Railway will try to deploy
+   - Click on the service settings (gear icon)
+   - Go to "Settings" tab
+   - Scroll to "Root Directory"
+   - **Set Root Directory to: `backend`** ⚠️ This is critical!
+   - Click "Save"
+   - The service will redeploy automatically
+
+5. **Alternative Method - Set Before Deploy**:
+   - When creating the service, look for "Configure" or "Settings"
+   - Set the root directory to `backend` before first deployment
+   
+6. **Set Environment Variables** (optional):
+   - Go to service "Variables" tab
    - Add `ENVIRONMENT=production`
    - Add `ALLOWED_ORIGINS` (will set after frontend deploys)
 
-6. **Get Backend URL**:
-   - After deployment, copy the public URL (e.g., `https://your-backend.railway.app`)
+7. **Get Backend URL**:
+   - After deployment succeeds, go to "Settings" → "Domains"
+   - Copy the public URL (e.g., `https://your-backend.up.railway.app`)
    - Save this URL for frontend configuration
 
 #### 2. Deploy Frontend Service
