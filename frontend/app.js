@@ -1,11 +1,12 @@
 import { db, auth, googleProvider, signInWithPopup, signOut, onAuthStateChanged } from "./firebase.js";
 import { collection, getDocs, query, where, limit, startAfter, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { config } from "./config.js";
 
 // ============================================
 // CONFIGURATION
 // ============================================
 const CONFIG = {
-    API_URL: "http://localhost:8000/api/age-check",
+    API_URL: config.API_URL,
     SAFETY: {
         CONFIDENCE_THRESHOLD: 0.60,
         ADULT_FRAME_BUFFER: 1, // Unlock faster (20s interval is long enough)

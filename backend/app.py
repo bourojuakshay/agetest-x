@@ -22,19 +22,35 @@ app = FastAPI(
 
 # Security & CORS
 # In production, specific origins should be allow-listed.
-ORIGINS = [
+import os
+
+# Get allowed origins from environment variable or use defaults
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "").split(",") if os.getenv("ALLOWED_ORIGINS") else [
     "http://localhost:5500",
     "http://127.0.0.1:5500",
-    "https://your-deployment-url.com"  # Replace with actual
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
 ]
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"], # Allow all for dev/demo, strict in prod
-    allow_credentials=True,
-    allow_methods=["POST", "GET", "OPTIONS"],
-    allow_headers=["*"],
-)
+# In development, allow all origins
+if os.getenv("RAILWAY_ENVIRONMENT") or os.getenv("ENVIRONMENT") == "production":
+    # Production: use specific origins
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=ALLOWED_ORIGINS,
+        allow_credentials=True,
+        allow_methods=["POST", "GET", "OPTIONS"],
+        allow_headers=["*"],
+    )
+else:
+    # Development: allow all
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["POST", "GET", "OPTIONS"],
+        allow_headers=["*"],
+    )
 
 # Initialize Service (Singleton)
 age_service = AgeService()
